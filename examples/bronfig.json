@@ -1,0 +1,17 @@
+
+{
+  "keywords": [
+    "relax",
+    "scf",
+    "symbroken",
+    "pristine",
+    "3E",
+    "3A2"
+  ],
+  "crawler-location": "./poscars.sh crawl",
+  "parser-location": "./poscars.sh parse"
+}
+
+
+
+

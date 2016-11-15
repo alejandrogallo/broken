@@ -4,6 +4,7 @@
 
 import argparse
 import json
+import yaml
 import sys
 import os
 
@@ -21,10 +22,11 @@ class Configuration(object):
 
     """Docstring for Configuration. """
 
-    def __init__(self, filePath):
+    def __init__(self, filePath, debug = False):
         self._filePath = filePath
         self._json = self.getJson()
         self._result_json = []
+        self._debug = debug
 
     def getJson(self):
         printv("Reading in the configuration")
@@ -65,17 +67,20 @@ class Configuration(object):
         return self._json["parser-location"]
 
     def execParser(self, filePath):
-        """TODO: Docstring for execParse.
+        """
+        If debug mode is on then it only returns the parsed information in form
+        of string.
 
-        :f: TODO
-        :returns: TODO
+        :filePath: Location of the parser script
+        :returns: dictionary if debug mode is off, string with json object if
+        it is on.
 
         """
         parserLocation = self.getParser()
-        jsonDataString = os.popen( parserLocation  + " " + filePath).read()
-        printv(jsonDataString)
-        jsonData = json.loads(jsonDataString)
-        return jsonData
+        yamlDataString = os.popen( parserLocation  + " " + filePath).read()
+        printv(yamlDataString)
+        yamlData = yaml.load(yamlDataString) if not self._debug else yamlDataString
+        return yamlData
 
     def appendToResults(self, dictObject):
         """TODO: Docstring for appendToResults.
@@ -85,6 +90,18 @@ class Configuration(object):
 
         """
         self._result_json.append(dictObject)
+
+    def save(self, fileName="results"):
+        """TODO: Docstring for save.
+
+        :fileName: TODO
+        :returns: TODO
+
+        """
+        with open(fileName+".yaml", "w") as outfile:
+            yaml.dump(self._result_json, outfile)
+        with open(fileName+".json", "w") as outfile:
+            json.dump(self._result_json, outfile)
 
     def run(self):
         """TODO: Docstring for run.
@@ -117,6 +134,11 @@ if __name__ == "__main__":
             default = defaultConfigName,
             action="store")
 
+    parser.add_argument("--debug",
+            help    = "Debug mode, for testing parser and crawler scripts",
+            default = False,
+            action="store_true")
+
     # Parse arguments
     args = parser.parse_args()
 
@@ -126,10 +148,11 @@ if __name__ == "__main__":
     else:
         VERBOSE=False
 
-    configuration = Configuration(args.config)
+    configuration = Configuration(args.config, debug = args.debug)
     configuration.run()
+    configuration.save()
 
 
 
-#vim-run: python % -v
+#vim-run: python3 % -v
 #vim-run: python % -v -h
